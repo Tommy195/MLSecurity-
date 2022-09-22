@@ -41,7 +41,6 @@ secure_headers = secure.Secure(
 )
 
 app.config["SECRET_KEY"] = os.environ.get('SECRET_KEY')
-app.config["SECRET_KEY"] = 'asdasdasdasdasdasde3433'
 app.config['SQLALCHEMY_DATABASE_URI'] = postgresqlConfig
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config["JWT_SECRET_KEY"] = os.environ.get('JWT_SECRET_KEY')
