@@ -16,16 +16,16 @@
 
 #### Import from external api
 ###### _`(Replace with Auth Token)`_
-`curl -XGET -H "Authorization: Bearer paste_token_here http://localhost:5000/information
+`curl -XGET -H "Authorization: Bearer paste_token_here http://localhost:5000/information'`
 
 #### Get list of imported data
 ###### _`(Replace with Auth Token)`_
-`curl -XGET -H "Authorization: Bearer paste_token_here http://localhost:5000/infomationlist
+`curl -XGET -H "Authorization: Bearer paste_token_here http://localhost:5000/infomationlist`
 
 #### Get one information by id
 ###### _`(Replace with Auth Token)`_
-`curl -XGET -d "id=1" -H "Authorization: Bearer paste_token_here http://localhost:5000/information/id
+`curl -XGET -d "id=1" -H "Authorization: Bearer paste_token_here http://localhost:5000/information/id`
 
 #### Delete one information by id
 ###### _`(Replace with Auth Token)`_
-`curl -DELETE -d "id=1" -H "Authorization: Bearer paste_token_here http://localhost:5000/information/id
+`curl -DELETE -d "id=1" -H "Authorization: Bearer paste_token_here http://localhost:5000/information/id`

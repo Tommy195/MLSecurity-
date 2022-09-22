@@ -1,4 +1,4 @@
-from app.db import db
+from db import db
 from werkzeug.security import hmac
 import bcrypt
 

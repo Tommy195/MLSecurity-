@@ -2,10 +2,10 @@ from flask_restful import Resource, reqparse
 from flask import jsonify
 from flask_jwt_extended import create_access_token, jwt_required
 from flask_jwt_extended import current_user
-from app.models.user import UserModel
-from app.util.encoder import AlchemyEncoder
+from models.user import UserModel
+from util.encoder import AlchemyEncoder
 import json
-from app.util.logz import create_logger
+from util.logz import create_logger
 import bcrypt
 import base64, hashlib
 

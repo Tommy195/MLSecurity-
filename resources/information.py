@@ -1,7 +1,7 @@
 from flask_restful import Resource
-from app.models.information import InformationModel
+from models.information import InformationModel
 from flask_jwt_extended import jwt_required
-from app.util.logz import create_logger
+from util.logz import create_logger
 
 class Information(Resource):
 

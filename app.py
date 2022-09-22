@@ -2,9 +2,9 @@ from flask import Flask
 from flask_jwt_extended import JWTManager
 from flask_restful import Api
 from flask_talisman import Talisman
-from app.resources.information import Information, InformationList, InformationById
-from app.resources.user import UserRegister, User
-from app.config import postgresqlConfig
+from resources.information import Information, InformationList, InformationById
+from resources.user import UserRegister, User
+from config import postgresqlConfig
 import secure
 import os
 
@@ -21,7 +21,9 @@ csp = (
     .img_src("'self'", "static.spam.com")
 )
 
-hsts = secure.StrictTransportSecurity().include_subdomains().preload().max_age(2592000)
+if os.environ.get('ENVIRONMENTPROD'):
+    hsts = secure.StrictTransportSecurity().include_subdomains().preload().max_age(2592000)
+    print(os.environ.get('ENVIRONMENTPROD'))
 
 referrer = secure.ReferrerPolicy().no_referrer()
 
@@ -31,14 +33,23 @@ permissions_value = (
 
 cache_value = secure.CacheControl().must_revalidate()
 
-secure_headers = secure.Secure(
+if os.environ.get('ENVIRONMENTPROD'):
+    secure_headers = secure.Secure(
     server=server,
     csp=csp,
     hsts=hsts,
     referrer=referrer,
     permissions=permissions_value,
     cache=cache_value,
-)
+    )
+else:
+    secure_headers = secure.Secure(
+    server=server,
+    csp=csp,
+    referrer=referrer,
+    permissions=permissions_value,
+    cache=cache_value,
+    )
 
 app.config["SECRET_KEY"] = os.environ.get('SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = postgresqlConfig

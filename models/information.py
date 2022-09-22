@@ -1,7 +1,7 @@
 import json
 import requests
 from dataclasses import dataclass
-from app.db import db
+from db import db
 import bcrypt
 import base64, hashlib
 
