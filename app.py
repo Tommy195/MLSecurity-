@@ -82,7 +82,7 @@ talisman = Talisman(
 
 @app.before_first_request
 def create_tables():
-    from app.db import db
+    from db import db
     db.init_app(app)
     db.create_all()
 
