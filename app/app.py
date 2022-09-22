@@ -1,81 +1,91 @@
-from flask import Flask, render_template, request, url_for, redirect, jsonify
-from flask_mysqldb import MySQL
+from flask import Flask
+from flask_jwt_extended import JWTManager
+from flask_restful import Api
+from flask_talisman import Talisman
+from app.resources.information import Information, InformationList, InformationById
+from app.resources.user import UserRegister, User
+from app.config import postgresqlConfig
+import secure
+import os
 
 app = Flask(__name__)
 
-# Conexión MySQL
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = '123456'
-app.config['MYSQL_DB'] = 'base_datos'
+server = secure.Server().set("Secure")
 
-conexion = MySQL(app)
+csp = (
+    secure.ContentSecurityPolicy()
+    .default_src("'none'")
+    .base_uri("'self'")
+    .connect_src("'self'" "api.spam.com")
+    .frame_src("'none'")
+    .img_src("'self'", "static.spam.com")
+)
 
+hsts = secure.StrictTransportSecurity().include_subdomains().preload().max_age(2592000)
 
-@app.before_request
-def before_request():
-    print("Antes de la petición...")
+referrer = secure.ReferrerPolicy().no_referrer()
 
+permissions_value = (
+    secure.PermissionsPolicy().geolocation("self", "'spam.com'").vibrate()
+)
 
-@app.after_request
-def after_request(response):
-    print("Después de la petición")
+cache_value = secure.CacheControl().must_revalidate()
+
+secure_headers = secure.Secure(
+    server=server,
+    csp=csp,
+    hsts=hsts,
+    referrer=referrer,
+    permissions=permissions_value,
+    cache=cache_value,
+)
+
+app.config["SECRET_KEY"] = os.environ.get('SECRET_KEY')
+app.config["SECRET_KEY"] = 'asdasdasdasdasdasde3433'
+app.config['SQLALCHEMY_DATABASE_URI'] = postgresqlConfig
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config["JWT_SECRET_KEY"] = os.environ.get('JWT_SECRET_KEY')
+
+jwt = JWTManager(app)
+api = Api(app)
+
+SELF = "'self'"
+talisman = Talisman(
+    app,
+    content_security_policy={
+        'default-src': SELF,
+        'img-src': '*',
+        'script-src': [
+            SELF,
+            'some.cdn.com',
+        ],
+        'style-src': [
+            SELF,
+            'another.cdn.com',
+        ],
+    },
+    content_security_policy_nonce_in=['script-src'],
+    feature_policy={
+        'geolocation': '\'none\'',
+    }
+)
+
+@app.before_first_request
+def create_tables():
+    from app.db import db
+    db.init_app(app)
+    db.create_all()
+
+api.add_resource(UserRegister, '/register')
+api.add_resource(User, '/user')
+api.add_resource(Information, '/information')
+api.add_resource(InformationById, '/information/<int:id>')
+api.add_resource(InformationList, '/infomationlist')
+
+async def set_secure_headers(request, call_next):
+    response = await call_next(request)
+    secure_headers.framework.flask(response)
     return response
 
-
-@app.route('/')
-def index():
-    # return "<h1>UskoKruM2010 - Suscríbete!</h1>"
-    cursos = ['PHP', 'Python', 'Java', 'Kotlin', 'Dart', 'JavaScript']
-    data = {
-        'titulo': 'Index123',
-        'bienvenida': '¡Saludos!',
-        'cursos': cursos,
-        'numero_cursos': len(cursos)
-    }
-    return render_template('index.html', data=data)
-
-
-@app.route('/contacto/<nombre>/<int:edad>')
-def contacto(nombre, edad):
-    data = {
-        'titulo': 'Contacto',
-        'nombre': nombre,
-        'edad': edad
-    }
-    return render_template('contacto.html', data=data)
-
-
-def query_string():
-    print(request)
-    print(request.args)
-    print(request.args.get('param1'))
-    print(request.args.get('param2'))
-    return "Ok"
-
-
-@app.route('/cursos')
-def listar_cursos():
-    data = {}
-    try:
-        cursor = conexion.connection.cursor()
-        sql = "SELECT codigo, nombre, creditos FROM curso ORDER BY nombre ASC"
-        cursor.execute(sql)
-        cursos = cursor.fetchall()
-        # print(cursos)
-        data['cursos'] = cursos
-        data['mensaje'] = 'Exito'
-    except Exception as ex:
-        data['mensaje'] = 'Error...'
-    return jsonify(data)
-
-
-def pagina_no_encontrada(error):
-    # return render_template('404.html'), 404
-    return redirect(url_for('index'))
-
-
 if __name__ == '__main__':
-    app.add_url_rule('/query_string', view_func=query_string)
-    app.register_error_handler(404, pagina_no_encontrada)
-    app.run(debug=True, port=5000)
+    app.run(debug=True) 
