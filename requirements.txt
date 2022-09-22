@@ -14,3 +14,4 @@ bcrypt
 secure
 flask-talisman
 flask-seasurf
+python-dotenv
